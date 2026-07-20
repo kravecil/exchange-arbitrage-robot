@@ -1,0 +1,11 @@
+[project]
+name = "crypto-arbitrage-bot"
+version = "0.1.0"
+description = "Межбиржевой арбитражный бот на базе ccxt"
+requires-python = ">=3.12"
+dependencies = [
+    "ccxt>=4.3.0",
+    "aiodns>=3.1.1",
+    "aiohttp>=3.9.3",
+    "rich>=13.7.0",
+]

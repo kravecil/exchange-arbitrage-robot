@@ -1,0 +1,29 @@
+{
+  "dry_run": true,
+  "trade_amount_usdt": 100,
+  "min_profit_threshold": 0.5,
+  "check_interval_seconds": 10,
+  "exchanges": {
+    "binance": {
+      "apiKey": "YOUR_BINANCE_API_KEY",
+      "secret": "YOUR_BINANCE_API_SECRET",
+      "enabled": true
+    },
+    "bybit": {
+      "apiKey": "YOUR_BYBIT_API_KEY",
+      "secret": "YOUR_BYBIT_API_SECRET",
+      "enabled": false
+    },
+    "okx": {
+      "apiKey": "YOUR_OKX_API_KEY",
+      "secret": "YOUR_OKX_API_SECRET",
+      "password": "YOUR_OKX_API_PASSPHRASE",
+      "enabled": false
+    }
+  },
+  "symbols": {
+    "use_all_common": true,
+    "include": [],
+    "exclude": []
+  }
+}
