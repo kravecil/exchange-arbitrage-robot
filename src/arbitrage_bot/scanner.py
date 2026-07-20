@@ -49,7 +49,6 @@ class MarketScanner:
         """Асинхронно запрашивает тикеры со всех бирж"""
         tasks = []
         for ex_id, ex in self.manager.exchanges.items():
-            # ccxt позволяет запрашивать тикеры только для нужных символов, что экономит лимиты
             tasks.append(self._safe_fetch_tickers(ex, ex_id, symbols))
         
         results = await asyncio.gather(*tasks)
@@ -66,8 +65,16 @@ class MarketScanner:
 
     async def _safe_fetch_tickers(self, ex, ex_id, symbols):
         try:
-            tickers = await ex.fetch_tickers(symbols)
-            return ex_id, tickers
+            # Пробуем загрузить все тикеры и отфильтровать локально
+            # Это более надежный способ, чем передавать список символов
+            all_tickers = await ex.fetch_tickers()
+            
+            # Фильтруем только нужные символы
+            filtered_tickers = {
+                symbol: ticker for symbol, ticker in all_tickers.items() 
+                if symbol in symbols
+            }
+            return ex_id, filtered_tickers
         except Exception as e:
             logger.warning(f"⚠️ Ошибка загрузки тикеров с {ex_id}: {e}")
             return ex_id, {}
