@@ -4,51 +4,19 @@ __pycache__/
 *$py.class
 *.so
 .Python
-build/
-develop-eggs/
-dist/
-downloads/
-eggs/
-.eggs/
-lib/
-lib64/
-parts/
-sdist/
-var/
-wheels/
-*.egg-info/
-.installed.cfg
-*.egg
-
-# Virtual environments
-.venv/
+env/
 venv/
+.venv/
 ENV/
-
-# uv
-.uv/
 
 # IDE
 .idea/
 .vscode/
 *.swp
 *.swo
-*~
 
-# Environment and secrets
-.env
-.env.local
-.env.*.local
-
-# Local config overrides
+# Project specific
 config.yaml
-config.local.yaml
-
-# Logs and runtime
+.env
 *.log
-logs/
-.cache/
-
-# OS
-.DS_Store
-Thumbs.db
+uv.lock

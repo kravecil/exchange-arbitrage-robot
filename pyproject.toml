@@ -1,33 +1,22 @@
 [project]
-name = "exchange-arbitrage-robot"
+name = "arbitrage-bot"
 version = "0.1.0"
-description = "Межбиржевой арбитражный робот на базе ccxt"
-readme = "README.md"
-requires-python = ">=3.12"
+description = "Professional inter-exchange crypto arbitrage bot"
+requires-python = ">=3.11"
 dependencies = [
-    "ccxt>=4.4.0",
-    "pydantic>=2.10.0",
-    "pydantic-settings>=2.7.0",
-    "pyyaml>=6.0.2",
-    "python-dotenv>=1.0.1",
+    "ccxt>=4.3.0",
+    "pydantic>=2.7.0",
+    "pydantic-settings>=2.2.0",
+    "pyyaml>=6.0.1",
+    "rich>=13.7.0",
 ]
 
 [project.scripts]
-arbitrage-robot = "arbitrage_robot.main:run"
+arb-bot = "arbitrage_bot.main:main"
 
 [build-system]
 requires = ["hatchling"]
 build-backend = "hatchling.build"
 
 [tool.hatch.build.targets.wheel]
-packages = ["src/arbitrage_robot"]
-
-[tool.hatch.build.targets.sdist]
-include = ["src/arbitrage_robot"]
-
-[tool.uv]
-package = true
-
-[tool.ruff]
-line-length = 100
-target-version = "py312"
+packages = ["src/arbitrage_bot"]
