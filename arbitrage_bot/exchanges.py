@@ -24,15 +24,19 @@ class ExchangeManager:
                 logger.error(f"❌ Ошибка подключения к {cfg.id}: {e}")
 
     def get_taker_fee(self, exchange_id: str) -> float:
-        """Возвращает комиссию мейкера/тейкера в процентах"""
+        """Возвращает комиссию тейкера в процентах"""
         cfg = self.configs[exchange_id]
         if cfg.taker_fee_percent is not None:
             return cfg.taker_fee_percent
         
         ex = self.exchanges[exchange_id]
         # В ccxt комиссии хранятся в долях (0.001 = 0.1%), переводим в проценты
-        fee = ex.fees['trading']['taker']
-        return fee * 100.0 
+        # Берем taker комиссию из trading fees
+        fee = ex.fees.get('trading', {}).get('taker')
+        if fee is None:
+            # Если комиссия неизвестна, используем стандартную ставку 0.1%
+            return 0.1
+        return fee * 100.0
 
     async def close_all(self):
         for ex in self.exchanges.values():
