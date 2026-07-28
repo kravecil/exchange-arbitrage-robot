@@ -15,11 +15,15 @@ class ExchangeManager:
                     'apiKey': cfg.apiKey,
                     'secret': cfg.secret,
                     'enableRateLimit': True,
-                    'options': {'defaultType': 'spot'},
+                    # Убран defaultType для поддержки фьючерсов и спотов
+                    # Если нужен только фьючерс, раскомментируйте строку ниже:
+                    # 'options': {'defaultType': 'future'},
                 })
                 await exchange.load_markets()
                 self.exchanges[cfg.id] = exchange
-                logger.info(f"✅ Биржа [bold green]{cfg.id}[/] успешно подключена. Активных пар: {len([m for m in exchange.markets.values() if m['active']])}")
+                # Подсчет активных фьючерсных пар
+                future_markets = [m for m in exchange.markets.values() if m.get('future') and m['active']]
+                logger.info(f"✅ Биржа [bold green]{cfg.id}[/] успешно подключена. Активных фьючерсных пар: {len(future_markets)}")
             except Exception as e:
                 logger.error(f"❌ Ошибка подключения к {cfg.id}: {e}")
 

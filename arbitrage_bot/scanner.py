@@ -6,7 +6,8 @@ from .logger import logger
 
 class ArbitrageOpportunity:
     def __init__(self, symbol: str, buy_exchange: str, sell_exchange: str, 
-                 buy_price: float, sell_price: float, spread_percent: float, net_profit_percent: float):
+                 buy_price: float, sell_price: float, spread_percent: float, net_profit_percent: float,
+                 expiry: str = None):
         self.symbol = symbol
         self.buy_exchange = buy_exchange
         self.sell_exchange = sell_exchange
@@ -14,6 +15,7 @@ class ArbitrageOpportunity:
         self.sell_price = sell_price
         self.spread_percent = spread_percent
         self.net_profit_percent = net_profit_percent
+        self.expiry = expiry  # Дата экспирации для фьючерсов
 
 class MarketScanner:
     def __init__(self, manager: ExchangeManager, settings: Settings):
@@ -21,12 +23,12 @@ class MarketScanner:
         self.settings = settings
 
     def _get_common_active_pairs(self) -> list[str]:
-        """Находит пересечение активных торговых пар на всех биржах"""
+        """Находит пересечение активных фьючерсных торговых пар на всех биржах"""
         active_sets = []
         for ex_id, ex in self.manager.exchanges.items():
             active_symbols = {
                 symbol for symbol, market in ex.markets.items() 
-                if market['active'] and market['spot']
+                if market['active'] and (market['future'] or market['swap'])
             }
             active_sets.append(active_symbols)
         
@@ -53,7 +55,7 @@ class MarketScanner:
         
         results = await asyncio.gather(*tasks)
         
-        # Формат: { 'BTC/USDT': { 'binance': {ticker_data}, 'bybit': {ticker_data} } }
+        # Формат: { 'BTC/USDT-260920': { 'binance': {ticker_data}, 'bybit': {ticker_data} } }
         tickers_map = {}
         for ex_id, tickers in results:
             for symbol in symbols:
@@ -82,10 +84,10 @@ class MarketScanner:
     async def find_opportunities(self) -> AsyncGenerator[ArbitrageOpportunity, None]:
         symbols = self._get_common_active_pairs()
         if len(symbols) < 5:
-            logger.warning("Слишком мало общих торговых пар для анализа.")
+            logger.warning("Слишком мало общих фьючерсных пар для анализа.")
             return
 
-        logger.info(f"🔍 Сканирование {len(symbols)} общих пар на {len(self.manager.exchanges)} биржах...")
+        logger.info(f"🔍 Сканирование {len(symbols)} общих фьючерсных пар на {len(self.manager.exchanges)} биржах...")
         tickers_map = await self.fetch_all_tickers(symbols)
 
         for symbol, exchanges_data in tickers_map.items():
@@ -117,6 +119,14 @@ class MarketScanner:
             # Итоговая прибыль = Спред - Комиссия на покупку - Комиссия на продажу
             net_profit = spread_percent - fee_buy - fee_sell
 
+            # Получаем дату экспирации из метаданных рынка
+            expiry = None
+            for ex_id, ticker in exchanges_data.items():
+                market = self.manager.exchanges[ex_id].markets.get(symbol)
+                if market:
+                    expiry = market.get('expiry')
+                    break
+
             if net_profit >= self.settings.min_profit_percent:
                 yield ArbitrageOpportunity(
                     symbol=symbol,
@@ -125,5 +135,6 @@ class MarketScanner:
                     buy_price=best_ask,
                     sell_price=best_bid,
                     spread_percent=spread_percent,
-                    net_profit_percent=net_profit
+                    net_profit_percent=net_profit,
+                    expiry=expiry
                 )

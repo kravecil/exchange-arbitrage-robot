@@ -13,15 +13,36 @@ exchanges:
     apiKey: "YOUR_BINANCE_API_KEY"
     secret: "YOUR_BINANCE_SECRET"
     # Опционально: можно переопределить комиссии, если у вас VIP статус
-    # taker_fee_percent: 0.05 
+    # taker_fee_percent: 0.05
+  - id: okx
+    apiKey: "YOUR_OKX_API"
+    secret: "YOUR_OKX_SECRET"
+    password: "YOUR_OKX_PASSPHRASE" # OKX требует passphrase
   - id: bybit
     apiKey: "YOUR_BYBIT_API_KEY"
     secret: "YOUR_BYBIT_SECRET"
+  - id: htx
+    apiKey: "YOUR_HTX_API_KEY"
+    secret: "YOUR_HTX_SECRET"
+  - id: kucoin
+    apiKey: "YOUR_KUCOIN_API_KEY"
+    secret: "YOUR_KUCOIN_SECRET"
+    password: "YOUR_KUCOIN_PASSPHRASE" # KuCoin требует passphrase
+  - id: mexc
+    apiKey: "YOUR_MEXC_API_KEY"
+    secret: "YOUR_MEXC_SECRET"
 
 # Фильтрация торговых пар
 pairs:
-  # Если whitelist пуст, бот будет использовать все доступные пары.
-  # Если указан, то ТОЛЬКО эти (например: ["BTC/USDT", "ETH/USDT"])
+  # Если whitelist пуст, бот будет использовать все доступные фьючерсные пары.
+  # Если указан, то ТОЛЬКО эти (например: ["BTC/USDT-260920", "ETH/USDT-260920"])
   whitelist: []
   # Пары, которые нужно исключить (например, стейблкоины или фиат)
-  blacklist: ["USDT/USD", "USDC/USD", "EUR/USD", "GBP/USD"]
+  # blacklist: ["USDT/USDT-260620", "USDC/USDT-260620"]
+  blacklist: []
+  # Тип контракта: 'future', 'swap' или null (любой)
+  contract_type: "future"
+  # Только контракты с экспирацией до этой даты (YYYYMMDD)
+  expiry_before: "20261231"
+  # Только контракты с экспирацией после этой даты (YYYYMMDD)
+  expiry_after: "20260901"

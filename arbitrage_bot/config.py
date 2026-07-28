@@ -12,6 +12,12 @@ class ExchangeConfig(BaseModel):
 class PairsConfig(BaseModel):
     whitelist: list[str] = Field(default_factory=list)
     blacklist: list[str] = Field(default_factory=list)
+    # Фильтр по типу контракта: 'future', 'swap', None (любой)
+    contract_type: Optional[str] = None
+    # Фильтр по дате экспирации (YYYYMMDD): будет выбрано контракты до этой даты
+    expiry_before: Optional[str] = None
+    # Фильтр по дате экспирации (YYYYMMDD): будет выбрано контракты после этой даты
+    expiry_after: Optional[str] = None
 
 class Settings(BaseModel):
     mode: str = "paper"

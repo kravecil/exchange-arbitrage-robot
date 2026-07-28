@@ -26,6 +26,14 @@ async def run_bot():
         logger.info(f"🤖 Бот запущен в режиме: [bold cyan]{settings.mode.upper()}[/]")
         logger.info(f"🎯 Целевая прибыль: {settings.min_profit_percent}% | Интервал: {settings.scan_interval_seconds}с")
         
+        # Логирование настроек фильтрации фьючерсов
+        if settings.pairs.contract_type:
+            logger.info(f"📋 Фильтр контрактов: {settings.pairs.contract_type}")
+        if settings.pairs.expiry_before:
+            logger.info(f"📅 Экспирация до: {settings.pairs.expiry_before}")
+        if settings.pairs.expiry_after:
+            logger.info(f"📅 Экспирация после: {settings.pairs.expiry_after}")
+        
         while True:
             try:
                 async for opportunity in scanner.find_opportunities():

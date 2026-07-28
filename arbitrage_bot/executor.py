@@ -25,14 +25,20 @@ class Executor:
         table.add_column("Продажа", style="red")
         table.add_column("Спред", justify="right")
         table.add_column("Чистая прибыль", justify="right", style="bold green")
+        if opp.expiry:
+            table.add_column("Экспирация", style="yellow")
 
-        table.add_row(
+        row = [
             opp.symbol,
             f"{opp.buy_exchange} @ {opp.buy_price:.4f}",
             f"{opp.sell_exchange} @ {opp.sell_price:.4f}",
             f"{opp.spread_percent:.3f}%",
             f"{opp.net_profit_percent:.3f}%"
-        )
+        ]
+        if opp.expiry:
+            row.append(opp.expiry)
+        
+        table.add_row(*row)
         console.print(table)
         logger.info(f"[dim]💡 В режиме 'live' здесь произошла бы одновременная покупка и продажа.[/dim]")
 
@@ -41,11 +47,13 @@ class Executor:
         # на обеих биржах, чтобы совершить сделки ОДНОВРЕМЕННО. 
         # Иначе вы рискуете попасть в "legs risk" (одна биржа исполнит ордер, а вторая нет).
         
-        logger.info(f"🚀 [bold red]LIVE TRADE[/] | {opp.symbol} | Buy: {opp.buy_exchange} | Sell: {opp.sell_exchange} | Profit: {opp.net_profit_percent:.2f}%")
+        expiry_info = f" | Экспирация: {opp.expiry}" if opp.expiry else ""
+        logger.info(f"🚀 [bold red]LIVE TRADE[/] | {opp.symbol} | Buy: {opp.buy_exchange} | Sell: {opp.sell_exchange} | Profit: {opp.net_profit_percent:.2f}%{expiry_info}")
         
         # Здесь должен быть код размещения ордеров.
         # Для MVP мы просто логируем, но в продакшене нужно использовать asyncio.gather 
         # для одновременной отправки create_market_buy_order и create_market_sell_order.
+        # Для фьючерсов используйте create_order(symbol, 'market', 'buy/sell', amount, price, {'timeInForce': 'GTC', 'reduceOnly': False})
         
         # Пример (раскомментировать и доработать для продакшена):
         # try:
