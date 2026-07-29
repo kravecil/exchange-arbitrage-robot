@@ -12,12 +12,17 @@ class ExchangeConfig(BaseModel):
 class PairsConfig(BaseModel):
     whitelist: list[str] = Field(default_factory=list)
     blacklist: list[str] = Field(default_factory=list)
-    # Фильтр по типу контракта: 'future', 'swap', None (любой)
+    # Тип контракта: 'swap' (перпетуалы) — рекомендуется для арбитража,
+    # 'future' (классические фьючерсы с экспирацией), None (любой)
     contract_type: Optional[str] = None
     # Фильтр по дате экспирации (YYYYMMDD): будет выбрано контракты до этой даты
     expiry_before: Optional[str] = None
     # Фильтр по дате экспирации (YYYYMMDD): будет выбрано контракты после этой даты
     expiry_after: Optional[str] = None
+    # Маппинг нестандартных символов бирж на канонический формат ccxt.
+    # Ключ — канонический символ (как в ccxt), значение — словарь {биржа: символ_биржи}.
+    # Пример: {"SHIB/USDT:USDT": {"bybit": "SHIB1000/USDT:USDT", "binance": "1000SHIB/USDT:USDT"}}
+    symbol_mapping: dict[str, dict[str, str]] = Field(default_factory=dict)
 
 class Settings(BaseModel):
     mode: str = "paper"
