@@ -3,6 +3,8 @@ from typing import AsyncGenerator
 from .exchanges import ExchangeManager
 from .config import Settings
 from .logger import logger
+from .symbol_normalizer import SymbolNormalizer
+
 
 class ArbitrageOpportunity:
     def __init__(self, symbol: str, buy_exchange: str, sell_exchange: str, 
@@ -15,25 +17,27 @@ class ArbitrageOpportunity:
         self.spread_percent = spread_percent
         self.net_profit_percent = net_profit_percent
 
+
 class MarketScanner:
     def __init__(self, manager: ExchangeManager, settings: Settings):
         self.manager = manager
         self.settings = settings
 
     def _get_common_active_pairs(self) -> list[str]:
-        """Находит пересечение активных торговых пар на всех биржах"""
-        active_sets = []
+        """Находит пересечение активных торговых пар на всех биржах (с нормализацией названий)"""
+        normalized_sets = []
         for ex_id, ex in self.manager.exchanges.items():
+            # Используем нормализованные маркеты из ExchangeManager
+            markets = self.manager.get_markets_by_exchange(ex_id)
             active_symbols = {
-                symbol for symbol, market in ex.markets.items() 
-                if market['active'] and market['spot']
+                symbol for symbol, market in markets.items()
             }
-            active_sets.append(active_symbols)
+            normalized_sets.append(active_symbols)
         
-        if not active_sets:
+        if not normalized_sets:
             return []
             
-        common_pairs = set.intersection(*active_sets)
+        common_pairs = set.intersection(*normalized_sets)
         
         # Применяем фильтры из конфига
         whitelist = set(self.settings.pairs.whitelist)
