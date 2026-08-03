@@ -1,0 +1,122 @@
+# ============================================================================
+#  Конфигурация робота межбиржевого арбитража (ФЬЮЧЕРСЫ)
+#  Все параметры подробно описаны в README.md
+# ============================================================================
+
+# paper — тестовые сделки (только вывод в консоль), live — реальные ордера
+mode: paper
+
+log_level: INFO
+log_file: logs/robot.log
+quote_currency: USDT
+
+# Периоды работы, сек
+scan_interval_sec: 0.2      # частота пересчёта спредов
+status_interval_sec: 15     # частота вывода статуса
+refresh_markets_sec: 3600
+
+# ---------------------------------------------------------------------------
+#  БИРЖИ
+#  Чтобы добавить биржу — раскомментируйте/допишите блок и укажите enabled: true.
+#  id — идентификатор из ccxt (binance, bybit, okx, gate, bitget, kucoinfutures...)
+#  Ключи берутся из переменных окружения (.env): <ID>_API_KEY, <ID>_SECRET,
+#  <ID>_PASSWORD — либо задайте свои имена через *_env.
+# ---------------------------------------------------------------------------
+exchanges:
+  - id: binance
+    enabled: true
+    market_type: swap        # бессрочные фьючерсы (USDT-M)
+    sandbox: false
+    leverage: 1
+    margin_mode: null        # cross / isolated / null (не менять)
+    maker_fee: null          # null — брать комиссию из ccxt
+    taker_fee: null
+    ws_symbol_limit: 150
+
+  - id: bybit
+    enabled: true
+    market_type: swap
+    sandbox: false
+    leverage: 1
+    maker_fee: null
+    taker_fee: null
+    ws_symbol_limit: 150
+
+  # - id: okx
+  #   enabled: true
+  #   market_type: swap
+  #   leverage: 1
+  #   ws_symbol_limit: 100
+
+  # - id: gate
+  #   enabled: false
+  #   market_type: swap
+
+  # - id: bitget
+  #   enabled: false
+  #   market_type: swap
+
+# ---------------------------------------------------------------------------
+#  ТОРГОВЫЕ ПАРЫ
+# ---------------------------------------------------------------------------
+symbols:
+  mode: auto                 # auto — автоподбор всех общих пар; manual — только include
+  quote_currencies: ["USDT"]
+  linear_only: true
+  require_active: true
+  max_symbols: 100           # ограничение количества отслеживаемых пар
+
+  # Приоритетные пары (в режиме manual — единственный источник)
+  include:
+    - "BTC/USDT:USDT"
+    - "ETH/USDT:USDT"
+    - "SOL/USDT:USDT"
+    - "XRP/USDT:USDT"
+    - "BNB/USDT:USDT"
+
+  # Пары, которые не торгуем никогда
+  exclude: []
+
+  # Базовые валюты-исключения (стейблкоины и т.п.)
+  exclude_bases: ["USDC", "BUSD", "TUSD", "FDUSD", "DAI"]
+
+# ---------------------------------------------------------------------------
+#  КОМИССИИ БИРЖ (учитываются в расчёте спреда)
+# ---------------------------------------------------------------------------
+fees:
+  use_exchange_fees: true       # брать реальные комиссии из ccxt
+  default_taker_fee: 0.0005     # 0.05 % — если биржа не отдала данные
+  default_maker_fee: 0.0002     # 0.02 %
+  fee_multiplier: 1.0           # >1 — консервативнее, <1 — учёт VIP-скидок
+  include_funding: false        # учитывать ставку финансирования
+  funding_pct_per_period: 0.01
+
+# ---------------------------------------------------------------------------
+#  СТРАТЕГИЯ: пороги превышения разницы цен
+# ---------------------------------------------------------------------------
+strategy:
+  min_spread_pct: 0.35        # ВВЕРХ: вход, если чистый спред (после комиссий) выше
+  max_spread_pct: 5.0         # отсечка аномалий: спред больше — игнорируем
+  exit_spread_pct: 0.05       # выход при сужении спреда
+  exit_on_reverse_pct: -0.5   # ВНИЗ: аварийный выход при развороте спреда
+  slippage_pct: 0.02          # заложенное проскальзывание
+
+  order_amount_quote: 100.0   # объём одной ноги в USDT
+  order_type: market          # market или limit
+  limit_price_offset_pct: 0.02
+
+  max_quote_age_ms: 3000      # максимальный возраст котировки
+  min_top_volume_quote: 0.0   # минимальная ликвидность в стакане (0 — не проверять)
+  cooldown_sec: 30            # пауза по паре после сделки
+  max_position_hold_sec: 3600 # максимальное время удержания позиции
+
+# ---------------------------------------------------------------------------
+#  РИСК-МЕНЕДЖМЕНТ
+# ---------------------------------------------------------------------------
+risk:
+  max_open_positions: 3
+  max_positions_per_symbol: 1
+  max_notional_quote: 1000.0     # суммарный объём открытых позиций
+  max_daily_loss_quote: 100.0    # дневной стоп-лосс
+  min_free_balance_quote: 0.0
+  require_balance_check: true

@@ -1,0 +1,62 @@
+[project]
+name = "exchange-arbitrage-robot"
+version = "0.1.0"
+description = "Робот межбиржевого арбитража фьючерсов (ccxt.pro, websocket, real-time)"
+readme = "README.md"
+requires-python = ">=3.12"
+license = { text = "MIT" }
+authors = [{ name = "kranik" }]
+keywords = ["arbitrage", "crypto", "futures", "ccxt", "trading-bot", "websocket"]
+
+dependencies = [
+    "ccxt>=4.4.0",
+    "pydantic>=2.9",
+    "pyyaml>=6.0",
+    "python-dotenv>=1.0",
+    "typer>=0.15",
+    "rich>=13.9",
+]
+
+[project.scripts]
+arb-robot = "arbitrage_robot.cli:app"
+
+[project.urls]
+Repository = "https://github.com/kravecil/exchange-arbitrage-robot"
+
+[dependency-groups]
+dev = [
+    "mypy>=1.13",
+    "pytest>=8.3",
+    "pytest-asyncio>=0.24",
+    "ruff>=0.8",
+    "types-pyyaml>=6.0",
+]
+
+[build-system]
+requires = ["hatchling"]
+build-backend = "hatchling.build"
+
+[tool.hatch.build.targets.wheel]
+packages = ["src/arbitrage_robot"]
+
+[tool.ruff]
+line-length = 100
+target-version = "py312"
+src = ["src", "tests"]
+
+[tool.ruff.lint]
+select = ["E", "F", "I", "UP", "B", "ANN", "ASYNC", "RUF"]
+ignore = ["ANN401"]
+
+[tool.ruff.lint.per-file-ignores]
+"tests/*" = ["ANN"]
+
+[tool.mypy]
+python_version = "3.12"
+strict = true
+ignore_missing_imports = true
+files = ["src", "tests"]
+
+[tool.pytest.ini_options]
+asyncio_mode = "auto"
+testpaths = ["tests"]
