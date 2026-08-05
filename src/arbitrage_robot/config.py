@@ -290,6 +290,10 @@ class AppConfig(_Base):
     log_level: str = Field(default="INFO", description="Уровень логирования")
     log_file: str | None = Field(default="logs/robot.log", description="Файл логов (или null)")
     quote_currency: str = Field(default="USDT", description="Основная котируемая валюта")
+    enable_status_logging: bool = Field(
+        default=True,
+        description="Включить вывод периодических статусных сообщений",
+    )
     refresh_markets_sec: float = Field(
         default=3600.0, gt=0.0, description="Период переоткрытия списка рынков, сек"
     )
@@ -369,6 +373,8 @@ def _apply_env_overrides(data: dict[str, Any]) -> dict[str, Any]:
         strategy["order_amount_quote"] = value
     if (value := env_int("ARB_MAX_POSITIONS")) is not None:
         risk["max_open_positions"] = value
+    if enable_status := os.getenv("ARB_ENABLE_STATUS_LOGGING"):
+        result["enable_status_logging"] = enable_status.strip().lower() in ("1", "true", "yes")
 
     if strategy:
         result["strategy"] = strategy

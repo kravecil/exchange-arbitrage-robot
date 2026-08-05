@@ -10,6 +10,9 @@ log_level: INFO
 log_file: logs/robot.log
 quote_currency: USDT
 
+# Включить вывод периодических статусных сообщений (опционально)
+# enable_status_logging: true
+
 # Периоды работы, сек
 scan_interval_sec: 0.2      # частота пересчёта спредов
 status_interval_sec: 15     # частота вывода статуса

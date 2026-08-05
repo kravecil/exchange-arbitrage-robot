@@ -304,7 +304,8 @@ class ArbitrageEngine:
         interval = self.config.status_interval_sec
         while not self._stop_event.is_set():
             await asyncio.sleep(interval)
-            self.print_status()
+            if self.config.enable_status_logging:
+                self.print_status()
 
     def print_status(self) -> None:
         """Вывести текущее состояние робота."""
