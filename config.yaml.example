@@ -23,15 +23,15 @@ refresh_markets_sec: 3600
 #  <ID>_PASSWORD — либо задайте свои имена через *_env.
 # ---------------------------------------------------------------------------
 exchanges:
-  - id: binance
-    enabled: true
-    market_type: swap        # бессрочные фьючерсы (USDT-M)
-    sandbox: false
-    leverage: 1
-    margin_mode: null        # cross / isolated / null (не менять)
-    maker_fee: null          # null — брать комиссию из ccxt
-    taker_fee: null
-    ws_symbol_limit: 150
+  # - id: binance
+  #   enabled: true
+  #   market_type: swap        # бессрочные фьючерсы (USDT-M)
+  #   sandbox: false
+  #   leverage: 1
+  #   margin_mode: null        # cross / isolated / null (не менять)
+  #   maker_fee: null          # null — брать комиссию из ccxt
+  #   taker_fee: null
+  #   ws_symbol_limit: 150
 
   - id: bybit
     enabled: true
@@ -42,11 +42,11 @@ exchanges:
     taker_fee: null
     ws_symbol_limit: 150
 
-  # - id: okx
-  #   enabled: true
-  #   market_type: swap
-  #   leverage: 1
-  #   ws_symbol_limit: 100
+  - id: okx
+    enabled: true
+    market_type: swap
+    leverage: 1
+    ws_symbol_limit: 100
 
   # - id: gate
   #   enabled: false

@@ -1,3 +1,6 @@
+config.yaml
+.vscode/
+
 # Секреты и локальные настройки
 .env
 .env.*
@@ -43,7 +46,6 @@ state/
 # IDE / ОС
 .idea/
 .vscode/
-!.vscode/settings.json
 *.swp
 .DS_Store
 Thumbs.db
