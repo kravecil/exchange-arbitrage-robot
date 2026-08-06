@@ -196,8 +196,20 @@ class ExchangeClient:
             return f"{self.id}: объём {amount} меньше минимального {min_amount} для {symbol}"
 
         min_cost = cost_limits.get("min")
-        if isinstance(min_cost, (int, float)) and amount * price < float(min_cost):
-            return f"{self.id}: стоимость {amount * price:.2f} меньше минимальной {min_cost}"
+        cost = amount * price
+        if isinstance(min_cost, (int, float)) and cost < float(min_cost):
+            return f"{self.id}: стоимость {cost:.2f} меньше минимальной {min_cost}"
+
+        # Отладочный вывод лимитов
+        self.log.debug(
+            "%s: amount=%.8f, price=%.8f, cost=%.2f, minAmount=%s, minCost=%s",
+            self.id,
+            amount,
+            price,
+            cost,
+            min_amount,
+            min_cost,
+        )
         return None
 
     # ------------------------------------------------------------------ #
