@@ -12,6 +12,7 @@ from ..logging_setup import console, get_logger
 from ..models import Opportunity, Position, Quote, TradeMode, now_ms
 from .executor import TradeExecutor
 from .market_data import QuoteBook
+from .notifications import OpportunityInfo, TelegramNotifier
 from .risk import RiskManager
 from .spread import SpreadFinder
 
@@ -31,6 +32,7 @@ class ArbitrageEngine:
         self.finder: SpreadFinder = SpreadFinder(self.clients, config.strategy, config.fees)
         self.risk: RiskManager = RiskManager(config.risk, config.strategy)
         self.executor: TradeExecutor = TradeExecutor(config, self.clients)
+        self.notifier: TelegramNotifier = TelegramNotifier(config.telegram)
         self.symbols_by_exchange: dict[str, list[str]] = {}
         self.common_symbols: list[str] = []
         self.trading_enabled: bool = True
@@ -52,6 +54,7 @@ class ArbitrageEngine:
         await asyncio.gather(*(client.load_markets() for client in self.clients.values()))
         self._select_symbols()
         self._check_credentials()
+        await self._prepare_notifier()
 
     def _select_symbols(self) -> None:
         """Отобрать пары, доступные минимум на двух биржах."""
@@ -143,7 +146,43 @@ class ArbitrageEngine:
         await asyncio.gather(
             *(client.close() for client in self.clients.values()), return_exceptions=True
         )
+        await self._stop_notifier()
         self.print_summary()
+
+    async def _prepare_notifier(self) -> None:
+        """Подготовить notifier для отправки уведомлений."""
+        try:
+            await self.notifier.connect()
+            await self.notifier.notify_start()
+        except ValueError as exc:
+            self.log.warning("Не удалось настроить уведомления: %s", exc)
+        except RuntimeError as exc:
+            self.log.error("Ошибка подключения к Telegram: %s", exc)
+
+    async def _stop_notifier(self) -> None:
+        """Остановить notifier."""
+        await self.notifier.notify_stop()
+        await self.notifier.disconnect()
+
+    async def _notify_opportunities(self, opportunities: list[Opportunity]) -> None:
+        """
+        Отправить уведомления о найденных возможностях.
+
+        :param opportunities: Список найденных возможностей.
+        """
+        for opportunity in opportunities:
+            info = OpportunityInfo(
+                symbol=opportunity.symbol,
+                buy_exchange=opportunity.buy_exchange,
+                sell_exchange=opportunity.sell_exchange,
+                net_spread_pct=opportunity.net_spread_pct,
+                gross_spread_pct=opportunity.gross_spread_pct,
+                fees_pct=opportunity.fees_pct,
+                amount=opportunity.amount,
+                notional=opportunity.notional,
+                route=opportunity.route,
+            )
+            await self.notifier.notify_opportunity(info)
 
     async def _stream(self, client: ExchangeClient) -> None:
         """Поток котировок одной биржи."""
@@ -193,6 +232,9 @@ class ArbitrageEngine:
         self.risk.stats.opportunities_found += len(opportunities)
         best = opportunities[0].net_spread_pct
         self.risk.stats.best_spread_pct = max(self.risk.stats.best_spread_pct, best)
+
+        # Уведомление о найденных возможностях
+        await self._notify_opportunities(opportunities)
 
         if not self.trading_enabled:
             for opportunity in opportunities[:3]:

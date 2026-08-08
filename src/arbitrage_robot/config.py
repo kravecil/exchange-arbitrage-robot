@@ -27,6 +27,7 @@ __all__ = [
     "RiskConfig",
     "StrategyConfig",
     "SymbolsConfig",
+    "TelegramConfig",
     "load_config",
 ]
 
@@ -280,6 +281,37 @@ class RiskConfig(_Base):
     )
 
 
+class TelegramConfig(_Base):
+    """Настройки уведомлений через Telegram."""
+
+    enabled: bool = Field(
+        default=False,
+        description="Включить отправку уведомлений в Telegram",
+    )
+    api_token_env: str = Field(
+        default="TELEGRAM_API_TOKEN",
+        description="Имя переменной окружения с API токеном бота",
+    )
+    chat_id_env: str = Field(
+        default="TELEGRAM_CHAT_ID",
+        description="Имя переменной окружения с ID получателя сообщений",
+    )
+    min_spread_pct: float = Field(
+        default=0.35,
+        description="Порог входа: минимальный ЧИСТЫЙ спред (после комиссий), % — уведомление при превышении",
+    )
+    max_spread_pct: float = Field(
+        default=5.0,
+        gt=0.0,
+        description="Верхняя отсечка: спред больше — не отправляем уведомление (аномалия)",
+    )
+    cooldown_sec: float = Field(
+        default=60.0,
+        gt=0.0,
+        description="Минимальный интервал между уведомлениями по одной паре, сек",
+    )
+
+
 class AppConfig(_Base):
     """Корневая конфигурация приложения."""
 
@@ -312,6 +344,7 @@ class AppConfig(_Base):
     fees: FeesConfig = Field(default_factory=FeesConfig)
     strategy: StrategyConfig = Field(default_factory=StrategyConfig)
     risk: RiskConfig = Field(default_factory=RiskConfig)
+    telegram: TelegramConfig = Field(default_factory=TelegramConfig, description="Настройки Telegram уведомлений")
 
     @model_validator(mode="after")
     def _check_exchanges(self) -> Self:

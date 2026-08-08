@@ -9,6 +9,7 @@ authors = [{ name = "kranik" }]
 keywords = ["arbitrage", "crypto", "futures", "ccxt", "trading-bot", "websocket"]
 
 dependencies = [
+    "aiogram>=3.12",
     "ccxt>=4.4.0",
     "pydantic>=2.9",
     "pyyaml>=6.0",

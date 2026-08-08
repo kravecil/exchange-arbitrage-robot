@@ -123,3 +123,14 @@ risk:
   max_daily_loss_quote: 100.0    # дневной стоп-лосс
   min_free_balance_quote: 0.0
   require_balance_check: true
+
+# ---------------------------------------------------------------------------
+#  TELEGRAM УВЕДОМЛЕНИЯ
+# ---------------------------------------------------------------------------
+telegram:
+  enabled: false                 # включить отправку уведомлений
+  api_token_env: TELEGRAM_API_TOKEN
+  chat_id_env: TELEGRAM_CHAT_ID
+  min_spread_pct: 0.35           # уведомление при превышении этого спреда
+  max_spread_pct: 5.0            # отсечка аномалий (если спред выше — не уведомлять)
+  cooldown_sec: 60               # пауза между уведомлениями по одной паре
