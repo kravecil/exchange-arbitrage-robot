@@ -9,7 +9,7 @@ from dataclasses import dataclass
 from datetime import datetime
 from typing import TYPE_CHECKING
 
-from ...config import TelegramConfig
+from ..config import TelegramConfig
 
 if TYPE_CHECKING:
     from aiogram import Bot
